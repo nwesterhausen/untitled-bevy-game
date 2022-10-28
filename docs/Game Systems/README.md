@@ -1,7 +1,9 @@
+# Game Systems
+
 I want to include the following systems in this game -- it's likely shaping out to be some sort of RPG.
 
 - Leveling - Experience gains from everything, but applied to skills in the way it works for Skyrim (i.e. tied to the thing you did to level up). However, in a broader sense there should be a character level and it just progresses from all experience but slower.
-- Skills - Various skill trees which have wide skill choices, granted by the system on "levelling up" in that skill. The granted skill should be skewed towards what the player did to accrue experience this level. The player should be able to deny a level up for a modest experience penalty.
+- [Skills](Skills.md) - Various skill trees for many [classes](Classes.md) which have wide skill choices, granted by the system on "levelling up" in that skill. The granted skill should be skewed towards what the player did to accrue experience this level. The player should be able to deny a level up for a modest experience penalty.
 - Magic - Magic which uses mana, requires "study" to learn spells and can affect the world broadly/realistically/un-restricted. There should be a way to let spells influence the world and the objects in the world be affected by that and not really casting and nothing happen or casting only on certain objects etc. 
 - Damage - Should try to be realistic -- not just direct 'freeze' or 'fire' damage from spells. Literally thermal changes which then can apply some effect on the recipient and nearby objects. Same with weapon strikes, shouldn't be a "15 damage" but instead a slice to some body part/blocked by armor/miss and consequences from that. 
 - Movement - Shouldn't be "frozen" in combat but be able to react within reason. Should be able to move but face a concentration penalty if applicable (e.g. while casting a spell)
