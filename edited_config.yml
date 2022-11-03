@@ -1,0 +1,9 @@
+unique_id: Test Ingest
+system: Magic
+must_precede: null
+must_follow: null
+author: Nicholas Westerhausen
+description: A sample ingest file.
+internal_version: 1
+display_version: 0.0.1
+valid_game_internal_version: 0
