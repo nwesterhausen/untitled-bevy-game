@@ -1,7 +1,7 @@
 header:
   unique_id: Test Ingest
   system: Skills
-  display_version: '0.0.1'
+  display_version: "0.0.1"
   valid_game_internal_version: 0
 skills:
   - name: Simple Endurance
