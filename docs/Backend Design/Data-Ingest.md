@@ -7,5 +7,7 @@ The information about the world, spells, and all other systems gets loaded into 
 The general format includes an unique id, the system, ordinal information, author, description, version and date.
 
 ```rust
-
+struct IngestHeader {
+    
+}
 ```
