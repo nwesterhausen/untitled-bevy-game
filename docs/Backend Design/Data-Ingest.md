@@ -4,10 +4,4 @@ The information about the world, spells, and all other systems gets loaded into 
 
 ## File Layout
 
-The general format includes an unique id, the system, ordinal information, author, description, version and date.
-
-```rust
-struct IngestHeader {
-    
-}
-```
+The general format includes an unique id, the system, ordinal information, author, description and version.
