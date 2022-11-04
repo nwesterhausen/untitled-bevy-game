@@ -1,0 +1,10 @@
+{
+  "port": 8086,
+  "root": "target/doc",
+  "open": [
+    "untitled_bevy_game/index.html"
+  ],
+  "host": "0.0.0.0",
+  "ignore": "*",
+  "watch": "target/doc"
+}

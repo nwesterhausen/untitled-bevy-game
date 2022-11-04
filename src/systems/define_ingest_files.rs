@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-/// The game systems which are defined from ingest files.
+/// The game systems which can be defined using ingest files.
+/// These are not every system in the game, but any system determined to be "modular"
 #[derive(Debug, Serialize, Deserialize)]
 pub enum GameSystems {
     /// The leveling system modifies the leveling curve for characters overall and for classes
@@ -16,7 +17,6 @@ pub enum GameSystems {
 }
 
 /// Each ingest file includes header information about the data in the file.
-/// We actually expect the ingest files to be in
 #[derive(Debug, Serialize, Deserialize)]
 pub struct IngestFileHeader {
     /// A unique identifier for this ingest file.
@@ -39,19 +39,35 @@ pub struct IngestFileHeader {
     pub valid_game_internal_version: u32,
 }
 
+/// The basic definition of an Ingest File. This includes a mapping of only the header information
 #[derive(Debug, Serialize, Deserialize)]
 pub struct IngestFile {
+    /// The header describes the content of the file
     pub header: IngestFileHeader,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SkillIngestData {
-    pub name: String,
-    pub description: String,
-}
-
+/// An ingest file for Skills includes a header and an array of skills.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillsIngestFile {
+    /// The header describes the content of the file
     pub header: IngestFileHeader,
+    /// An array of skill data to be ingested
     pub skills: Vec<SkillIngestData>,
+}
+
+/// A Skill has a few key details, but references Classes which should exist (and if they don't, they are ignored)
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SkillIngestData {
+    /// Displayed name of the skill
+    pub name: String,
+    /// Description of the skill, which should be brief
+    pub description: String,
+    /// Full description of the skill, including any extra detail
+    pub long_description: Option<String>,
+    /// Unique identifier for this skill
+    pub unique_id: String,
+    /// Required classes, listed by their unique IDs
+    pub class_requisites: Vec<String>,
+    /// Primary classes (if any), which strongly influence gaining this skill
+    pub primary_classes: Option<Vec<String>>,
 }

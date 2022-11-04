@@ -1,0 +1,13 @@
+header:
+  unique_id: Test Ingest
+  system: Skills
+  author: Nicholas Westerhausen
+  description: A sample ingest file.
+  internal_version: 1
+  display_version: '0.0.1'
+  valid_game_internal_version: 0
+skills:
+  - name: Simple Endurance
+    description: Increases endurance slightly.
+    unique_id: simple_endurance
+    class_requisites: []
