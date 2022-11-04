@@ -15,309 +15,72 @@
 #![deny(unsafe_code)]
 
 use bevy::{
+    diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
     input::mouse::{MouseScrollUnit, MouseWheel},
+    log::LogSettings,
     prelude::*,
     winit::WinitSettings,
 };
-use env_logger::Env;
 use systems::ingest_file_util::load_ingest_file_dir;
 
 mod systems;
 
 fn main() {
-    env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
-
-    load_ingest_file_dir("ingest_test");
+    // env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
 
     App::new()
+        .insert_resource(LogSettings {
+            filter:
+                "info,untitled_bevy_game=debug,wgpu_core=warn,wgpu_hal=warn,wgpu_hal::auxil=error"
+                    .into(),
+            level: bevy::log::Level::DEBUG,
+        })
         .add_plugins(DefaultPlugins)
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        .add_system(text_update_system)
+        .add_system(text_color_system)
+        .add_system(button_system)
         // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
         .insert_resource(WinitSettings::desktop_app())
         .add_startup_system(setup)
+        .add_startup_system(system_load)
         .add_system(mouse_scroll)
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // Camera
-    commands.spawn_bundle(Camera2dBundle::default());
+fn system_load() {
+    log::debug!("Test");
+    load_ingest_file_dir("ingest_test");
+}
 
-    // root node
-    commands
-        .spawn_bundle(NodeBundle {
-            style: Style {
-                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                justify_content: JustifyContent::SpaceBetween,
-                ..default()
-            },
-            color: Color::NONE.into(),
-            ..default()
-        })
-        .with_children(|parent| {
-            // left vertical fill (border)
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Px(200.0), Val::Percent(100.0)),
-                        border: UiRect::all(Val::Px(2.0)),
-                        ..default()
-                    },
-                    color: Color::rgb(0.65, 0.65, 0.65).into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    // left vertical fill (content)
-                    parent
-                        .spawn_bundle(NodeBundle {
-                            style: Style {
-                                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                                align_items: AlignItems::FlexEnd,
-                                ..default()
-                            },
-                            color: Color::rgb(0.15, 0.15, 0.15).into(),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            // text
-                            parent.spawn_bundle(
-                                TextBundle::from_section(
-                                    "Text Example",
-                                    TextStyle {
-                                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                        font_size: 30.0,
-                                        color: Color::WHITE,
-                                    },
-                                )
-                                .with_style(Style {
-                                    margin: UiRect::all(Val::Px(5.0)),
-                                    ..default()
-                                }),
-                            );
-                        });
-                });
-            // right vertical fill
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::ColumnReverse,
-                        justify_content: JustifyContent::Center,
-                        size: Size::new(Val::Px(200.0), Val::Percent(100.0)),
-                        ..default()
-                    },
-                    color: Color::rgb(0.15, 0.15, 0.15).into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    // Title
-                    parent.spawn_bundle(
-                        TextBundle::from_section(
-                            "Scrolling list",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 25.,
-                                color: Color::WHITE,
-                            },
-                        )
-                        .with_style(Style {
-                            size: Size::new(Val::Undefined, Val::Px(25.)),
-                            margin: UiRect {
-                                left: Val::Auto,
-                                right: Val::Auto,
-                                ..default()
-                            },
-                            ..default()
-                        }),
-                    );
-                    // List with hidden overflow
-                    parent
-                        .spawn_bundle(NodeBundle {
-                            style: Style {
-                                flex_direction: FlexDirection::ColumnReverse,
-                                align_self: AlignSelf::Center,
-                                size: Size::new(Val::Percent(100.0), Val::Percent(50.0)),
-                                overflow: Overflow::Hidden,
-                                ..default()
-                            },
-                            color: Color::rgb(0.10, 0.10, 0.10).into(),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            // Moving panel
-                            parent
-                                .spawn_bundle(NodeBundle {
-                                    style: Style {
-                                        flex_direction: FlexDirection::ColumnReverse,
-                                        flex_grow: 1.0,
-                                        max_size: Size::new(Val::Undefined, Val::Undefined),
-                                        ..default()
-                                    },
-                                    color: Color::NONE.into(),
-                                    ..default()
-                                })
-                                .insert(ScrollingList::default())
-                                .with_children(|parent| {
-                                    // List items
-                                    for i in 0..30 {
-                                        parent.spawn_bundle(
-                                            TextBundle::from_section(
-                                                format!("Item {i}"),
-                                                TextStyle {
-                                                    font: asset_server
-                                                        .load("fonts/FiraSans-Bold.ttf"),
-                                                    font_size: 20.,
-                                                    color: Color::WHITE,
-                                                },
-                                            )
-                                            .with_style(Style {
-                                                flex_shrink: 0.,
-                                                size: Size::new(Val::Undefined, Val::Px(20.)),
-                                                margin: UiRect {
-                                                    left: Val::Auto,
-                                                    right: Val::Auto,
-                                                    ..default()
-                                                },
-                                                ..default()
-                                            }),
-                                        );
-                                    }
-                                });
-                        });
-                });
-            // absolute positioning
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Px(200.0), Val::Px(200.0)),
-                        position_type: PositionType::Absolute,
-                        position: UiRect {
-                            left: Val::Px(210.0),
-                            bottom: Val::Px(10.0),
-                            ..default()
-                        },
-                        border: UiRect::all(Val::Px(20.0)),
-                        ..default()
-                    },
-                    color: Color::rgb(0.4, 0.4, 1.0).into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    parent.spawn_bundle(NodeBundle {
-                        style: Style {
-                            size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                            ..default()
-                        },
-                        color: Color::rgb(0.8, 0.8, 1.0).into(),
-                        ..default()
-                    });
-                });
-            // render order test: reddest in the back, whitest in the front (flex center)
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                        position_type: PositionType::Absolute,
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    },
-                    color: Color::NONE.into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    parent
-                        .spawn_bundle(NodeBundle {
-                            style: Style {
-                                size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                                ..default()
-                            },
-                            color: Color::rgb(1.0, 0.0, 0.0).into(),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            parent.spawn_bundle(NodeBundle {
-                                style: Style {
-                                    size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Px(20.0),
-                                        bottom: Val::Px(20.0),
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                color: Color::rgb(1.0, 0.3, 0.3).into(),
-                                ..default()
-                            });
-                            parent.spawn_bundle(NodeBundle {
-                                style: Style {
-                                    size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Px(40.0),
-                                        bottom: Val::Px(40.0),
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                color: Color::rgb(1.0, 0.5, 0.5).into(),
-                                ..default()
-                            });
-                            parent.spawn_bundle(NodeBundle {
-                                style: Style {
-                                    size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Px(60.0),
-                                        bottom: Val::Px(60.0),
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                color: Color::rgb(1.0, 0.7, 0.7).into(),
-                                ..default()
-                            });
-                            // alpha test
-                            parent.spawn_bundle(NodeBundle {
-                                style: Style {
-                                    size: Size::new(Val::Px(100.0), Val::Px(100.0)),
-                                    position_type: PositionType::Absolute,
-                                    position: UiRect {
-                                        left: Val::Px(80.0),
-                                        bottom: Val::Px(80.0),
-                                        ..default()
-                                    },
-                                    ..default()
-                                },
-                                color: Color::rgba(1.0, 0.9, 0.9, 0.4).into(),
-                                ..default()
-                            });
-                        });
-                });
-            // bevy logo (flex center)
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                        position_type: PositionType::Absolute,
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::FlexEnd,
-                        ..default()
-                    },
-                    color: Color::NONE.into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    // bevy logo (image)
-                    parent.spawn_bundle(ImageBundle {
-                        style: Style {
-                            size: Size::new(Val::Px(500.0), Val::Auto),
-                            ..default()
-                        },
-                        image: asset_server.load("branding/bevy_logo_dark_big.png").into(),
-                        ..default()
-                    });
-                });
-        });
+const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
+const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
+const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+
+fn button_system(
+    mut interaction_query: Query<
+        (&Interaction, &mut UiColor, &Children),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut text_query: Query<&mut Text>,
+) {
+    for (interaction, mut color, children) in &mut interaction_query {
+        let mut text = text_query.get_mut(children[0]).unwrap();
+        match *interaction {
+            Interaction::Clicked => {
+                text.sections[0].value = "Press".to_string();
+                *color = PRESSED_BUTTON.into();
+            }
+            Interaction::Hovered => {
+                text.sections[0].value = "Hover".to_string();
+                *color = HOVERED_BUTTON.into();
+            }
+            Interaction::None => {
+                text.sections[0].value = "Button".to_string();
+                *color = NORMAL_BUTTON.into();
+            }
+        }
+    }
 }
 
 #[derive(Component, Default)]
@@ -345,6 +108,121 @@ fn mouse_scroll(
             scrolling_list.position += dy;
             scrolling_list.position = scrolling_list.position.clamp(-max_scroll, 0.);
             style.position.top = Val::Px(scrolling_list.position);
+        }
+    }
+}
+
+// A unit struct to help identify the FPS UI component, since there may be many Text components
+#[derive(Component)]
+struct FpsText;
+
+// A unit struct to help identify the color-changing Text component
+#[derive(Component)]
+struct ColorText;
+
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // UI camera
+    commands.spawn_bundle(Camera2dBundle::default());
+    // Text with one section
+    commands
+        .spawn_bundle(
+            // Create a TextBundle that has a Text with a single section.
+            TextBundle::from_section(
+                // Accepts a `String` or any type that converts into a `String`, such as `&str`
+                "hello\nbevy!",
+                TextStyle {
+                    font: asset_server.load("fonts/FredokaOne-Regular.ttf"),
+                    font_size: 100.0,
+                    color: Color::WHITE,
+                },
+            ) // Set the alignment of the Text
+            .with_text_alignment(TextAlignment::TOP_CENTER)
+            // Set the style of the TextBundle itself.
+            .with_style(Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: UiRect {
+                    bottom: Val::Px(5.0),
+                    right: Val::Px(15.0),
+                    ..default()
+                },
+                ..default()
+            }),
+        )
+        .insert(ColorText);
+    // Text with multiple sections
+    commands
+        .spawn_bundle(
+            // Create a TextBundle that has a Text with a list of sections.
+            TextBundle::from_sections([
+                TextSection::new(
+                    "FPS: ",
+                    TextStyle {
+                        font: asset_server.load("fonts/FredokaOne-Regular.ttf"),
+                        font_size: 60.0,
+                        color: Color::WHITE,
+                    },
+                ),
+                TextSection::from_style(TextStyle {
+                    font: asset_server.load("fonts/FredokaOne-Regular.ttf"),
+                    font_size: 60.0,
+                    color: Color::GOLD,
+                }),
+            ])
+            .with_style(Style {
+                align_self: AlignSelf::FlexEnd,
+                ..default()
+            }),
+        )
+        .insert(FpsText);
+    commands
+        .spawn_bundle(ButtonBundle {
+            style: Style {
+                size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                // center button
+                margin: UiRect::all(Val::Auto),
+                // horizontally center child text
+                justify_content: JustifyContent::Center,
+                // vertically center child text
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            color: NORMAL_BUTTON.into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn_bundle(TextBundle::from_section(
+                "Button",
+                TextStyle {
+                    font: asset_server.load("fonts/FredokaOne-Regular.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgb(0.9, 0.9, 0.9),
+                },
+            ));
+        });
+}
+
+fn text_color_system(time: Res<Time>, mut query: Query<&mut Text, With<ColorText>>) {
+    for mut text in &mut query {
+        let seconds = time.seconds_since_startup() as f32;
+
+        // Update the color of the first and only section.
+        text.sections[0].style.color = Color::Rgba {
+            red: (1.25 * seconds).sin() / 2.0 + 0.5,
+            green: (0.75 * seconds).sin() / 2.0 + 0.5,
+            blue: (0.50 * seconds).sin() / 2.0 + 0.5,
+            alpha: 1.0,
+        };
+    }
+}
+
+fn text_update_system(diagnostics: Res<Diagnostics>, mut query: Query<&mut Text, With<FpsText>>) {
+    for mut text in &mut query {
+        if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
+            if let Some(average) = fps.average() {
+                // Update the value of the second section
+                text.sections[1].value = format!("{average:.2}");
+            }
         }
     }
 }
