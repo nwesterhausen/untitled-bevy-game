@@ -16,7 +16,7 @@
 
 use bevy::{
     diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
-    log::LogSettings,
+    log::LogPlugin,
     prelude::*,
     winit::WinitSettings,
 };
@@ -30,12 +30,12 @@ fn main() {
 
     App::new()
         // add logging, but filter out some noisy logs
-        .insert_resource(LogSettings {
+        .add_plugins(DefaultPlugins.set(LogPlugin {
             filter:
                 "info,untitled_bevy_game=debug,wgpu_core=warn,wgpu_hal=warn,wgpu_hal::auxil=error"
                     .into(),
             level: bevy::log::Level::DEBUG,
-        })
+        }))
         // default plugins
         .add_plugins(DefaultPlugins)
         // fps diagnostic plugin
@@ -79,12 +79,12 @@ fn configure_visuals(mut egui_ctx: ResMut<EguiContext>) {
 
 fn basic_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Camera
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default());
 
     // See https://github.com/BorisBoutillier/Kataster/blob/main/src/ui.rs for some ideas
 
     // My custom text to spawn the title
-    commands.spawn_bundle(
+    commands.spawn(
         TextBundle::from_section(
             "untitled bevy game",
             TextStyle {
@@ -111,7 +111,7 @@ fn basic_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Text with multiple sections (has the 'FPS' label and the 'FPS' display)
     commands
-        .spawn_bundle(
+        .spawn(
             // Create a TextBundle that has a Text with a list of sections.
             TextBundle::from_sections([
                 TextSection::new(
