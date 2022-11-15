@@ -29,6 +29,7 @@ fn main() {
     // env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
 
     App::new()
+        // default plugins
         // add logging, but filter out some noisy logs
         .add_plugins(DefaultPlugins.set(LogPlugin {
             filter:
@@ -36,8 +37,6 @@ fn main() {
                     .into(),
             level: bevy::log::Level::DEBUG,
         }))
-        // default plugins
-        .add_plugins(DefaultPlugins)
         // fps diagnostic plugin
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // egui inspector
